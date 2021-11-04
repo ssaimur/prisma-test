@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model admin_offers {
+  id             Int             @id @default(autoincrement())
+  product_id     Int?
+  queen_phone    String?         @db.VarChar(255)
+  offer_type     String?         @db.VarChar(255)
+  offer_desc     String?         @db.VarChar(255)
+  exp_date       String?         @db.VarChar(255)
+  seen_by_admin  String?         @db.VarChar(255)
+  status         String?         @default("Pending") @db.VarChar(255)
+  admin_products admin_products? @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "admin_offers_ibfk_1")
+
+  @@index([product_id], map: "product_id")
+}
+
+model admin_products {
+  id                Int            @id @default(autoincrement())
+  queen_phone       String?        @db.VarChar(255)
+  product_name      String?        @db.VarChar(255)
+  category          String?        @db.VarChar(255)
+  product_picture_1 String?        @db.VarChar(255)
+  product_picture_2 String?        @db.VarChar(255)
+  price             String?        @db.VarChar(255)
+  delivery_day      String?        @db.VarChar(10)
+  short_desc        String?        @db.VarChar(500)
+  seen_by_admin     String?        @default("No") @db.VarChar(255)
+  status            String?        @default("Pending") @db.VarChar(255)
+  admin_offers      admin_offers[]
+}
+
+model admin_queens {
+  id                    Int       @id @default(autoincrement())
+  name                  String?   @db.VarChar(255)
+  phone                 String?   @unique(map: "phone") @db.VarChar(255)
+  password              String?   @db.VarChar(255)
+  photo                 String?   @db.VarChar(255)
+  address               String?   @db.VarChar(255)
+  lat                   String?   @db.VarChar(255)
+  lang                  String?   @db.VarChar(255)
+  bank_name             String?   @db.VarChar(255)
+  account_number        String?   @db.VarChar(255)
+  nid_front             String?   @db.VarChar(255)
+  nid_back              String?   @db.VarChar(255)
+  status                String?   @default("Pending") @db.VarChar(255)
+  last_update           DateTime? @default(now()) @db.Timestamp(0)
+  update_request_status Int?
+  update_type           String?   @default("new account") @db.VarChar(255)
+  seen_by_admin         String?   @default("No") @db.VarChar(255)
+}
+
+model customers {
+  id       Int     @id @default(autoincrement())
+  name     String? @db.VarChar(255)
+  phone    String? @unique(map: "phone") @db.VarChar(255)
+  password String? @db.VarChar(255)
+  photo    String? @db.VarChar(255)
+  address  String? @db.VarChar(255)
+  lat      String? @db.VarChar(255)
+  lang     String? @db.VarChar(255)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model others_auth {
+  id          Int
+  app_version String @default("2.2") @db.VarChar(255)
+
+  @@ignore
+}
+
+model queens {
+  id      Int    @id @default(autoincrement())
+  name    String @db.VarChar(255)
+  phone   String @db.VarChar(255)
+  age     String @db.VarChar(255)
+  address String @db.VarChar(255)
+  photo   String @default("logo.jpg") @db.VarChar(255)
+}
