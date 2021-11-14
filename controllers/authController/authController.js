@@ -30,6 +30,16 @@ authControllers.register = (table) => {
       const { name, phone, address, bank_name, account_number } = req.body;
       const { filename } = req.file;
 
+      const setBank =
+        table === 'admin_queens' ? { account_number, bank_name } : {};
+
+      const getBank =
+        table === 'admin_queens'
+          ? { account_number: true, bank_name: true }
+          : {};
+
+      console.log({ table });
+
       const user = await prisma[table].create({
         data: {
           name,
@@ -37,10 +47,17 @@ authControllers.register = (table) => {
           password: hashedPassword,
           photo: filename,
           address,
-          [table === 'admin_queens' && 'account_number']: account_number,
-          [table === 'admin_queens' && 'bank_name']: bank_name,
+          ...setBank,
+        },
+        select: {
+          name: true,
+          phone: true,
+          photo: true,
+          address: true,
+          ...getBank,
         },
       });
+      res.status(200).json({ user });
 
       // const q = `INSERT INTO ${table} (name, phone, password, photo, ${
       //   table === 'admin_queens' && 'bank_name'
@@ -84,8 +101,6 @@ authControllers.register = (table) => {
       //       .json({ success: true, message: 'User successfully created' });
       //   }
       // });
-
-      res.status(200).json({ user });
     },
     { dirName: table === 'admin_queens' ? 'queens' : 'customers' }
   );

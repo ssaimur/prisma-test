@@ -14,16 +14,21 @@ controller.queenUploadProduct = async (req, res, next) => {
   const product_picture_1 = req.files[0] && req.files[0].filename;
   const product_picture_2 = req.files[1] && req.files[1].filename;
 
-  const updatedProduct = await prisma.admin_products.update({
+  const product = await prisma.admin_products.create({
     where: { id },
     data: {
       queen_phone: phone,
       product_name,
       category,
+      price,
+      delivery_day,
+      short_desc,
       product_picture_1,
       product_picture_2,
     },
   });
+
+  res.status(200).json({ success: true, data: product });
   // const filteredQ = productUpdateQuery(req, 'upload');
 
   // const files = [];
@@ -66,30 +71,62 @@ controller.queenGetAllProduct = (req, res, next) => {
 
 // queen update product
 controller.queenUpdateProduct = (req, res, next) => {
-  const filteredQ = productUpdateQuery(req, 'update');
+  const { phone, id } = req.params;
+  const { product_name, category, price, delivery_day, short_desc } = req.body;
 
-  const files = [];
+  const product_picture_1 = req.files[0] && req.files[0].filename;
+  const product_picture_2 = req.files[1] && req.files[1].filename;
 
-  [
-    req.files[0] && req.files[0].filename,
-    req.files[1] && req.files[1].filename,
-  ].map((item) => item !== undefined && files.push(item));
+  const fieldsName = req.files.map((item) => item.fieldname);
 
-  db.query(filteredQ, (err) => {
-    if (err) {
-      deleteFile('products', files, (err) => {
-        if (err) {
-          console.log({ err });
-        }
-      });
+  const fieldsToUpdate = {};
 
-      next(new CustomError(err.message, 500, err.code));
-    } else {
-      res
-        .status(200)
-        .json({ success: true, message: 'Pruduct successfully updated' });
-    }
+  if (fieldsName.includes('product_picture_1')) {
+    fieldsToUpdate.product_picture_1 = product_picture_1;
+  }
+  if (fieldsName.includes('product_picture_2')) {
+    fieldsToUpdate.product_picture_2 = product_picture_2 || product_picture_1;
+  }
+
+  const updatedProduct = prisma.admin_products.update({
+    where: { id },
+    data: {
+      queen_phone: phone,
+      product_name,
+      category,
+      price,
+      delivery_day,
+      short_desc,
+      ...fieldsToUpdate,
+    },
   });
+
+  res.status(200).json({ success: true, data: updatedProduct });
+
+  // const filteredQ = productUpdateQuery(req, 'update');
+
+  // const files = [];
+
+  // [
+  //   req.files[0] && req.files[0].filename,
+  //   req.files[1] && req.files[1].filename,
+  // ].map((item) => item !== undefined && files.push(item));
+
+  // db.query(filteredQ, (err) => {
+  //   if (err) {
+  //     deleteFile('products', files, (err) => {
+  //       if (err) {
+  //         console.log({ err });
+  //       }
+  //     });
+
+  //     next(new CustomError(err.message, 500, err.code));
+  //   } else {
+  //     res
+  //       .status(200)
+  //       .json({ success: true, message: 'Pruduct successfully updated' });
+  //   }
+  // });
 };
 
 // queen delete product

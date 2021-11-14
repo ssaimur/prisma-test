@@ -3,12 +3,14 @@ const {
   register,
   login,
 } = require('../../controllers/authController/authController');
+const prismaHelper = require('../../middlewares/commonMiddleware/prismaMiddleware');
 const singleUploader = require('../../middlewares/fileUploader/singleUploaderMw');
 
 // register a queen
 router.post(
   '/queen/register',
   singleUploader('queens'),
+  prismaHelper,
   register('admin_queens')
 );
 
